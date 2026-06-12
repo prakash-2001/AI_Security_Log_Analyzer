@@ -1,0 +1,116 @@
+# ============================================================
+# Sample Security Log File — AI Security Log Analyzer
+# Contains: Apache access logs + SSH syslog entries
+# Threats embedded: Brute Force, Data Exfiltration,
+#   Privilege Escalation, Path Traversal, Credential Stuffing
+# ============================================================
+
+# --- Normal daytime traffic ---
+203.0.113.10 - alice [08/Jun/2026:09:05:01 +0000] "GET /index.html HTTP/1.1" 200 1024
+203.0.113.10 - alice [08/Jun/2026:09:05:03 +0000] "GET /about.html HTTP/1.1" 200 2048
+203.0.113.10 - alice [08/Jun/2026:09:05:07 +0000] "GET /contact.html HTTP/1.1" 200 1536
+198.51.100.20 - bob   [08/Jun/2026:09:15:22 +0000] "GET /products HTTP/1.1" 200 4096
+198.51.100.20 - bob   [08/Jun/2026:09:15:25 +0000] "GET /products/123 HTTP/1.1" 200 2048
+198.51.100.20 - bob   [08/Jun/2026:09:16:10 +0000] "POST /cart/add HTTP/1.1" 200 512
+198.51.100.20 - bob   [08/Jun/2026:09:17:05 +0000] "POST /checkout HTTP/1.1" 302 0
+100.64.0.5   - carol  [08/Jun/2026:10:30:00 +0000] "GET /dashboard HTTP/1.1" 200 8192
+100.64.0.5   - carol  [08/Jun/2026:10:30:12 +0000] "GET /reports HTTP/1.1" 200 16384
+100.64.0.5   - carol  [08/Jun/2026:10:31:00 +0000] "GET /reports/monthly HTTP/1.1" 200 32768
+
+# --- THREAT 1: Brute Force Login (192.168.1.105) ---
+192.168.1.105 - - [08/Jun/2026:02:11:01 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:03 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:05 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:07 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:09 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:11 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:13 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:15 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:17 +0000] "POST /login HTTP/1.1" 401 512
+192.168.1.105 - - [08/Jun/2026:02:11:19 +0000] "POST /login HTTP/1.1" 200 1024
+
+# --- THREAT 2: SSH Brute Force (192.168.1.105) ---
+Jun  8 02:11:01 webserver sshd[1001]: Failed password for root from 192.168.1.105 port 54321 ssh2
+Jun  8 02:11:03 webserver sshd[1001]: Failed password for root from 192.168.1.105 port 54322 ssh2
+Jun  8 02:11:05 webserver sshd[1001]: Failed password for admin from 192.168.1.105 port 54323 ssh2
+Jun  8 02:11:07 webserver sshd[1001]: Failed password for ubuntu from 192.168.1.105 port 54324 ssh2
+Jun  8 02:11:09 webserver sshd[1001]: Failed password for deploy from 192.168.1.105 port 54325 ssh2
+Jun  8 02:11:11 webserver sshd[1001]: Failed password for root from 192.168.1.105 port 54326 ssh2
+
+# --- THREAT 3: Credential Stuffing via SSH (10.10.10.77) ---
+Jun  8 03:00:01 webserver sshd[2001]: Failed password for john from 10.10.10.77 port 11001 ssh2
+Jun  8 03:00:03 webserver sshd[2001]: Failed password for jane from 10.10.10.77 port 11002 ssh2
+Jun  8 03:00:05 webserver sshd[2001]: Failed password for mike from 10.10.10.77 port 11003 ssh2
+Jun  8 03:00:07 webserver sshd[2001]: Failed password for sarah from 10.10.10.77 port 11004 ssh2
+Jun  8 03:00:09 webserver sshd[2001]: Failed password for test from 10.10.10.77 port 11005 ssh2
+Jun  8 03:00:11 webserver sshd[2001]: Failed password for guest from 10.10.10.77 port 11006 ssh2
+Jun  8 03:00:13 webserver sshd[2001]: Invalid user oracle from 10.10.10.77 port 11007 ssh2
+Jun  8 03:00:15 webserver sshd[2001]: Invalid user postgres from 10.10.10.77 port 11008 ssh2
+
+# --- THREAT 4: Data Exfiltration (10.0.0.88) — high volume + large bytes ---
+10.0.0.88 - - [08/Jun/2026:03:45:00 +0000] "GET /api/users HTTP/1.1" 200 65536
+10.0.0.88 - - [08/Jun/2026:03:45:01 +0000] "GET /api/users?page=2 HTTP/1.1" 200 65536
+10.0.0.88 - - [08/Jun/2026:03:45:02 +0000] "GET /api/users?page=3 HTTP/1.1" 200 65536
+10.0.0.88 - - [08/Jun/2026:03:45:03 +0000] "GET /api/orders HTTP/1.1" 200 131072
+10.0.0.88 - - [08/Jun/2026:03:45:04 +0000] "GET /api/orders?page=2 HTTP/1.1" 200 131072
+10.0.0.88 - - [08/Jun/2026:03:45:05 +0000] "GET /api/payments HTTP/1.1" 200 262144
+10.0.0.88 - - [08/Jun/2026:03:45:06 +0000] "GET /api/payments?page=2 HTTP/1.1" 200 262144
+10.0.0.88 - - [08/Jun/2026:03:45:07 +0000] "GET /api/transactions HTTP/1.1" 200 524288
+10.0.0.88 - - [08/Jun/2026:03:45:08 +0000] "GET /api/transactions?page=2 HTTP/1.1" 200 524288
+10.0.0.88 - - [08/Jun/2026:03:45:09 +0000] "GET /api/reports/annual HTTP/1.1" 200 1048576
+10.0.0.88 - - [08/Jun/2026:03:45:10 +0000] "GET /api/customers HTTP/1.1" 200 131072
+10.0.0.88 - - [08/Jun/2026:03:45:11 +0000] "GET /api/customers?page=2 HTTP/1.1" 200 131072
+10.0.0.88 - - [08/Jun/2026:03:45:12 +0000] "GET /api/customers?page=3 HTTP/1.1" 200 131072
+10.0.0.88 - - [08/Jun/2026:03:45:13 +0000] "GET /api/invoices HTTP/1.1" 200 65536
+10.0.0.88 - - [08/Jun/2026:03:45:14 +0000] "GET /api/invoices?page=2 HTTP/1.1" 200 65536
+10.0.0.88 - - [08/Jun/2026:03:45:15 +0000] "GET /api/audit-log HTTP/1.1" 200 262144
+10.0.0.88 - - [08/Jun/2026:03:45:16 +0000] "GET /api/audit-log?page=2 HTTP/1.1" 200 262144
+10.0.0.88 - - [08/Jun/2026:03:45:17 +0000] "GET /api/backup HTTP/1.1" 200 2097152
+10.0.0.88 - - [08/Jun/2026:03:45:18 +0000] "GET /api/config HTTP/1.1" 200 32768
+10.0.0.88 - - [08/Jun/2026:03:45:19 +0000] "GET /api/secrets HTTP/1.1" 403 256
+10.0.0.88 - - [08/Jun/2026:03:45:20 +0000] "GET /api/keys HTTP/1.1" 403 256
+10.0.0.88 - - [08/Jun/2026:03:45:21 +0000] "GET /api/tokens HTTP/1.1" 403 256
+10.0.0.88 - - [08/Jun/2026:03:45:22 +0000] "GET /api/credentials HTTP/1.1" 403 256
+10.0.0.88 - - [08/Jun/2026:03:45:23 +0000] "GET /api/env HTTP/1.1" 404 128
+10.0.0.88 - - [08/Jun/2026:03:45:24 +0000] "GET /api/database HTTP/1.1" 403 256
+10.0.0.88 - - [08/Jun/2026:03:45:25 +0000] "GET /api/schema HTTP/1.1" 200 16384
+10.0.0.88 - - [08/Jun/2026:03:45:26 +0000] "GET /api/health HTTP/1.1" 200 1024
+10.0.0.88 - - [08/Jun/2026:03:45:27 +0000] "GET /api/metrics HTTP/1.1" 200 8192
+10.0.0.88 - - [08/Jun/2026:03:45:28 +0000] "GET /api/status HTTP/1.1" 200 512
+10.0.0.88 - - [08/Jun/2026:03:45:29 +0000] "GET /api/version HTTP/1.1" 200 128
+
+# --- THREAT 5: Privilege Escalation / Off-Hours Admin Access (172.16.0.55) ---
+172.16.0.55 - - [08/Jun/2026:01:30:00 +0000] "GET /admin HTTP/1.1" 200 4096
+172.16.0.55 - - [08/Jun/2026:01:30:05 +0000] "GET /admin/dashboard HTTP/1.1" 200 8192
+172.16.0.55 - - [08/Jun/2026:01:30:10 +0000] "GET /admin/users HTTP/1.1" 200 16384
+172.16.0.55 - - [08/Jun/2026:01:30:15 +0000] "POST /admin/users/create HTTP/1.1" 201 512
+172.16.0.55 - - [08/Jun/2026:01:30:20 +0000] "PUT /admin/users/42/role HTTP/1.1" 200 256
+172.16.0.55 - - [08/Jun/2026:01:30:25 +0000] "DELETE /admin/users/17 HTTP/1.1" 204 0
+172.16.0.55 - - [08/Jun/2026:01:31:00 +0000] "GET /admin/settings HTTP/1.1" 200 4096
+172.16.0.55 - - [08/Jun/2026:01:31:10 +0000] "POST /admin/settings/update HTTP/1.1" 200 512
+172.16.0.55 - - [08/Jun/2026:01:31:30 +0000] "GET /admin/logs HTTP/1.1" 200 65536
+172.16.0.55 - - [08/Jun/2026:01:32:00 +0000] "DELETE /admin/logs/clear HTTP/1.1" 200 128
+
+# --- THREAT 6: Path Traversal / LFI Attempts (192.168.2.200) ---
+192.168.2.200 - - [08/Jun/2026:04:00:01 +0000] "GET /download?file=../../../etc/passwd HTTP/1.1" 400 256
+192.168.2.200 - - [08/Jun/2026:04:00:02 +0000] "GET /download?file=../../../etc/shadow HTTP/1.1" 400 256
+192.168.2.200 - - [08/Jun/2026:04:00:03 +0000] "GET /%2e%2e/%2e%2e/etc/passwd HTTP/1.1" 400 256
+192.168.2.200 - - [08/Jun/2026:04:00:04 +0000] "GET /wp-admin/install.php HTTP/1.1" 404 256
+192.168.2.200 - - [08/Jun/2026:04:00:05 +0000] "GET /phpmyadmin/index.php HTTP/1.1" 404 256
+192.168.2.200 - - [08/Jun/2026:04:00:06 +0000] "GET /.env HTTP/1.1" 403 128
+192.168.2.200 - - [08/Jun/2026:04:00:07 +0000] "GET /.git/config HTTP/1.1" 403 128
+192.168.2.200 - - [08/Jun/2026:04:00:08 +0000] "GET /config/database.php HTTP/1.1" 403 128
+192.168.2.200 - - [08/Jun/2026:04:00:09 +0000] "GET /backup.zip HTTP/1.1" 404 128
+192.168.2.200 - - [08/Jun/2026:04:00:10 +0000] "GET /db_dump.sql HTTP/1.1" 404 128
+
+# --- Normal SSH accepted logins ---
+Jun  8 09:00:01 webserver sshd[3001]: Accepted publickey for deploy from 10.0.0.10 port 22 ssh2
+Jun  8 10:30:00 webserver sshd[3002]: Accepted password for alice from 203.0.113.10 port 55000 ssh2
+Jun  8 11:15:44 webserver sshd[3003]: Accepted publickey for bob from 198.51.100.20 port 55001 ssh2
+
+# --- More normal traffic ---
+45.77.100.200  - - [08/Jun/2026:12:00:00 +0000] "GET / HTTP/1.1" 200 2048
+45.77.100.200  - - [08/Jun/2026:12:00:05 +0000] "GET /blog HTTP/1.1" 200 4096
+45.77.100.200  - - [08/Jun/2026:12:00:10 +0000] "GET /blog/post-1 HTTP/1.1" 200 8192
+185.220.101.50 - - [08/Jun/2026:13:22:33 +0000] "GET /sitemap.xml HTTP/1.1" 200 1024
+185.220.101.50 - - [08/Jun/2026:13:22:35 +0000] "GET /robots.txt HTTP/1.1" 200 256
