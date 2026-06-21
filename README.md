@@ -1,5 +1,7 @@
 # 🔒 AI Security Log Analyzer
 
+🔗 Live Demo: https://aisecurity-log-analyzer.streamlit.app/
+
 A **production-quality, free-to-run** web application that parses server logs,
 detects security threats using a rule-based engine, and calls the **Groq AI API**
 for intelligent threat classification and remediation advice.
